@@ -1,0 +1,110 @@
+# Weather API Setup and Testing Instructions
+
+## 1. Database Setup
+
+1. Install MongoDB Enterprise Edition
+2. Start MongoDB services:
+   ```
+   sudo systemctl start mongod
+   ```
+3. Create admin user:
+   ```
+   use admin
+   db.createUser({
+     user: "weather-api-admin",
+     pwd: "auqHePSDp2rFX6cA",
+     roles: ["root"]
+   })
+   ```
+
+## 2. Sharding Configuration
+
+1. Start config servers:
+   ```
+   mongod --configsvr --replSet configReplSet --port 27019
+   ```
+
+2. Start shard servers:
+   ```
+   mongod --shardsvr --replSet shard1 --port 27018
+   ```
+
+3. Start mongos router:
+   ```
+   mongos --configdb configReplSet/localhost:27019
+   ```
+
+4. Run sharding script:
+   ```
+   mongo < scripts/init-sharding.js
+   ```
+
+## 3. API Testing
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Start server:
+   ```
+   npm run dev
+   ```
+
+## 4. Example API Requests
+
+### Weather Endpoints
+
+1. Create Reading:
+```
+POST /api/weather/reading
+Authorization: Bearer <token>
+{
+  "deviceName": "SENSOR001",
+  "time": "2023-12-20T10:00:00Z",
+  "latitude": -27.4705,
+  "longitude": 153.0260,
+  "temperature": 25.5,
+  "atmosphericPressure": 101.3,
+  "maxWindSpeed": 5.2,
+  "solarRadiation": 850,
+  "vaporPressure": 2.3,
+  "humidity": 65,
+  "windDirection": 180,
+  "precipitation": 0.2
+}
+```
+
+2. Get Max Precipitation:
+```
+GET /api/weather/precipitation/max
+Authorization: Bearer <token>
+```
+
+### User Endpoints
+
+1. Create User:
+```
+POST /api/users
+Authorization: Bearer <token>
+{
+  "username": "teacher1",
+  "email": "teacher1@school.edu",
+  "password": "securepass123",
+  "role": "teacher"
+}
+```
+
+2. Update Access Levels:
+```
+PATCH /api/users/access
+Authorization: Bearer <token>
+{
+  "users": [
+    {
+      "userId": "user_id_here",
+      "role": "teacher"
+    }
+  ]
+}
+```
